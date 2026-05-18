@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | EventHallBook</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root { --primary: #4f46e5; --dark: #0f172a; }
+        body { font-family: 'Outfit', sans-serif; background-color: #f1f5f9; min-height: 100vh; }
+        h1, h2, h3, h4, .serif-font { font-family: 'Playfair Display', serif; }
+        .navbar { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .glass-card { background: white; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05); padding: 2rem; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-4 text-dark" href="index.html">
+                <i class="bi bi-arrow-left-circle-fill text-primary me-2"></i> Back to Home
+            </a>
+            <div>
+                <a href="mybookings.html" class="btn btn-outline-primary btn-sm rounded-pill px-4 me-2">My Bookings</a>
+                <button onclick="logout()" class="btn btn-danger btn-sm rounded-pill px-4">Sign Out</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container d-flex justify-content-center" style="margin-top: 120px; margin-bottom: 50px;">
+        <div class="col-lg-6 col-md-8">
+            <div class="glass-card text-center mb-4">
+                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;" id="avatarInitial">U</div>
+                <h2 class="serif-font fw-bold" id="userName">User Name</h2>
+                <p class="text-muted"><i class="bi bi-envelope me-2"></i><span id="userEmail">user@example.com</span></p>
+            </div>
+
+            <div class="glass-card">
+                <h5 class="fw-bold mb-4 border-bottom pb-2">Account Settings</h5>
+                <form onsubmit="updateProfile(event)">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">FULL NAME</label>
+                        <input type="text" id="editName" class="form-control" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted">PHONE NUMBER</label>
+                        <input type="tel" id="editPhone" class="form-control" placeholder="+91...">
+                    </div>
+                    <button class="btn btn-primary w-100 py-2 rounded-3 fw-bold">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const userDataStr = localStorage.getItem('userData');
+            const token = localStorage.getItem('authToken');
+
+            if (!userDataStr || !token) return window.location.href = 'login.html';
+
+            currentUser = JSON.parse(userDataStr);
+            document.getElementById('userName').innerText = currentUser.name;
+            document.getElementById('userEmail').innerText = currentUser.email;
+            document.getElementById('avatarInitial').innerText = currentUser.name.charAt(0).toUpperCase();
+            document.getElementById('editName').value = currentUser.name;
+            document.getElementById('editPhone').value = currentUser.phone || '';
+        });
+
+        async function updateProfile(e) {
+            e.preventDefault();
+            const newName = document.getElementById('editName').value;
+            const newPhone = document.getElementById('editPhone').value;
+            const token = localStorage.getItem('authToken');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/users/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ name: newName, phone: newPhone })
+                });
+
+                if (response.ok) {
+                    currentUser.name = newName;
+                    currentUser.phone = newPhone;
+                    localStorage.setItem('userData', JSON.stringify(currentUser));
+                    Swal.fire({ icon: 'success', title: 'Profile Updated', showConfirmButton: false, timer: 1500 })
+                    .then(() => location.reload());
+                } else throw new Error('Failed');
+            } catch (error) {
+                Swal.fire('Error', 'Could not update profile.', 'error');
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

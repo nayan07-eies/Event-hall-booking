@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | EventHallBook</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --dark: #0f172a;
+            --light: #f8fafc;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #f1f5f9;
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        .serif-font { font-family: 'Playfair Display', serif; }
+
+        /* Card Container */
+        .auth-card {
+            border: none;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            background: white;
+            max-width: 1000px;
+            width: 95%;
+            margin: 20px;
+        }
+
+        /* Banner Section */
+        .auth-banner {
+            background: url('https://images.unsplash.com/photo-1505236858219-8359eb29e329?q=80&w=1924&auto=format&fit=crop') no-repeat center center/cover;
+            position: relative;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 3rem;
+        }
+
+        .banner-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(15, 23, 42, 0.6), rgba(79, 70, 229, 0.8));
+            z-index: 1;
+        }
+
+        .banner-content { position: relative; z-index: 2; }
+
+        /* Form Styling */
+        .form-control {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            background-color: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        .input-group-text {
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+        }
+
+        /* Checkbox Customization */
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-card">
+        <div class="row g-0">
+            <div class="col-lg-5 auth-banner d-none d-lg-flex">
+                <div class="banner-overlay"></div>
+                
+                <div class="banner-content">
+                    <div class="d-flex align-items-center gap-2 mb-4">
+                        <i class="bi bi-gem fs-4 text-white"></i>
+                        <span class="fw-bold fs-5">EventHall<span class="text-info">Book</span></span>
+                    </div>
+                    
+                    <div class="mb-5">
+                        <h2 class="display-5 fw-bold mb-3 serif-font">Welcome<br>Back.</h2>
+                        <p class="opacity-75 lead">Log in to manage your bookings, view saved venues, and access exclusive offers.</p>
+                    </div>
+                </div>
+
+                <div class="banner-content text-center">
+                    <small class="text-white-50 letter-spacing-2">TRUSTED BY 500+ AGENCIES</small>
+                </div>
+            </div>
+
+            <div class="col-lg-7 bg-white p-4 p-md-5 d-flex flex-column justify-content-center">
+                <div class="text-center mb-5 d-lg-none">
+                    <h3 class="fw-bold text-primary"><i class="bi bi-gem"></i> EventHallBook</h3>
+                </div>
+
+                <div class="mb-4">
+                    <h3 class="fw-bold mb-1 serif-font text-dark display-6">Sign In</h3>
+                    <p class="text-muted">Please enter your details to continue.</p>
+                </div>
+
+                <form id="loginForm">
+                    <div class="mb-4">
+                        <label class="form-label text-muted small fw-bold text-uppercase">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope text-muted"></i></span>
+                            <input type="email" id="loginEmail" class="form-control" placeholder="nayan@gmail.com" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Password</label>
+                            <a href="#" class="text-primary small text-decoration-none fw-bold">Forgot Password?</a>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock text-muted"></i></span>
+                            <input type="password" id="loginPass" class="form-control border-end-0" placeholder="Enter your password" required>
+                            <span class="input-group-text bg-white border-start-0" style="cursor: pointer;" onclick="togglePassword()">
+                                <i id="toggleIcon" class="bi bi-eye text-muted"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe">
+                        <label class="form-check-label text-muted small" for="rememberMe">Keep me logged in</label>
+                    </div>
+
+                    <button type="submit" id="loginBtn" class="btn btn-primary w-100 py-3 fw-bold fs-6 shadow-sm">
+                        Sign In <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                    
+                    <div class="text-center mt-4">
+                        <p class="text-muted small">
+                            Don't have an account? 
+                            <a href="register.html" class="text-primary fw-bold text-decoration-none">Create Account</a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // 1. Password Visibility Toggle (Kept exactly as you had it)
+    function togglePassword() {
+        const pwInput = document.getElementById('loginPass');
+        const icon = document.getElementById('toggleIcon');
+        if (pwInput.type === 'password') {
+            pwInput.type = 'text';
+            icon.classList.replace('bi-eye', 'bi-eye-slash');
+        } else {
+            pwInput.type = 'password';
+            icon.classList.replace('bi-eye-slash', 'bi-eye');
+        }
+    }
+
+    // 2. Real API Login Logic
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('loginEmail').value;
+        const pass = document.getElementById('loginPass').value;
+        const btn = document.getElementById('loginBtn');
+        const originalBtnText = btn.innerHTML;
+
+        // Loading State
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Authenticating...';
+        btn.disabled = true;
+
+        try {
+            // Send the email and password to our new Node.js server
+            const response = await fetch('http://localhost:3000/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: email, password: pass })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // SUCCESS: Save the secure token and user data
+                localStorage.setItem('authToken', data.token); 
+                localStorage.setItem('userData', JSON.stringify(data.user));
+
+                Swal.fire({
+                    icon: 'success', 
+                    title: 'Welcome Back!',
+                    text: `Hello, ${data.user.name.split(' ')[0]}`,
+                    timer: 1500, 
+                    showConfirmButton: false,
+                    confirmButtonColor: '#4f46e5'
+                }).then(() => {
+                    // SMART ROUTING: Redirect based on the role given by the backend
+                    if (data.user.role === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else if (data.user.role === 'owner') {
+                        window.location.href = 'owner-dashboard.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                });
+
+            } else {
+                // FAILURE: Wrong email or password
+                Swal.fire({
+                    icon: 'error', 
+                    title: 'Login Failed',
+                    text: data.message || 'Invalid email or password. Please try again.',
+                    confirmButtonColor: '#4f46e5'
+                });
+                
+                // Reset Button
+                btn.innerHTML = originalBtnText;
+                btn.disabled = false;
+            }
+        } catch (error) {
+            // NETWORK ERROR: Backend isn't running
+            Swal.fire({
+                icon: 'error', 
+                title: 'Server Error',
+                text: 'Could not connect to the server. Make sure your Node.js backend is running!',
+                confirmButtonColor: '#4f46e5'
+            });
+            console.error('Login error:', error);
+            
+            // Reset Button
+            btn.innerHTML = originalBtnText;
+            btn.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>

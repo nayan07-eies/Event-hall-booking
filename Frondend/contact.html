@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | EventHallBook</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.9);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #f1f5f9;
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, .serif-font { font-family: 'Playfair Display', serif; }
+
+        /* Navbar */
+        .navbar { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+
+        /* Hero */
+        .page-header {
+            background: linear-gradient(135deg, var(--dark), #1e1b4b);
+            color: white;
+            padding: 5rem 0 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .page-header::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: url('https://www.transparenttextures.com/patterns/cubes.png');
+            opacity: 0.1;
+        }
+
+        /* Contact Cards */
+        .contact-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            transition: 0.3s;
+            height: 100%;
+        }
+        .contact-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            border-color: var(--primary);
+        }
+        
+        .icon-circle {
+            width: 70px; height: 70px;
+            background: #eef2ff;
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 1.5rem;
+        }
+
+        /* Form */
+        .glass-form {
+            background: white;
+            padding: 3rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+        }
+        
+        .form-control, .form-select {
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        .form-control:focus {
+            background: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        /* Accordion */
+        .accordion-item { border: none; margin-bottom: 1rem; background: transparent; }
+        .accordion-button {
+            background: white;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            font-weight: 600;
+            padding: 1.2rem;
+        }
+        .accordion-button:not(.collapsed) {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+        .accordion-button:not(.collapsed)::after {
+            filter: brightness(0) invert(1);
+        }
+        .accordion-body {
+            background: #fff;
+            border-radius: 12px;
+            margin-top: 5px;
+            padding: 1.5rem;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg fixed-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-4 text-dark" href="index.html">
+                <i class="bi bi-gem text-primary"></i> EventHall<span class="text-primary">Book</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link text-dark" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link text-dark" href="halls.html">Venues</a></li>
+                    <li class="nav-item"><a class="nav-link text-primary fw-bold" href="contact.html">Contact</a></li>
+                    <li class="nav-item ms-lg-3">
+                        <a class="btn btn-dark rounded-pill px-4" href="login.html">Login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <header class="page-header mt-5">
+        <div class="container text-center" data-aos="fade-up">
+            <h1 class="display-4 fw-bold">Get in Touch</h1>
+            <p class="lead opacity-75" style="max-width: 600px; margin: 0 auto;">
+                Have questions about listing your venue or booking a space? Our support team is here to help 24/7.
+            </p>
+        </div>
+    </header>
+
+    <div class="container" style="margin-top: -50px; position: relative; z-index: 2;">
+        <div class="row g-4 mb-5">
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="0">
+                <div class="contact-card">
+                    <div class="icon-circle"><i class="bi bi-geo-alt"></i></div>
+                    <h5 class="fw-bold">Our Office</h5>
+                    <p class="text-muted small mb-0">404, AR mall, mota varachha<br>surat, Gujarat 395006</p>
+                </div>
+            </div>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="contact-card">
+                    <div class="icon-circle"><i class="bi bi-envelope"></i></div>
+                    <h5 class="fw-bold">Email Us</h5>
+                    <p class="text-muted small mb-0">eventhallbooking@gmail.com<br>nayan@gmail.com</p>
+                </div>
+            </div>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="contact-card">
+                    <div class="icon-circle"><i class="bi bi-telephone"></i></div>
+                    <h5 class="fw-bold">Call Us</h5>
+                    <p class="text-muted small mb-0">+91 7861030449<br>Mon-Fri, 9am - 6pm</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-5 mb-5">
+            <div class="col-lg-7" data-aos="fade-right">
+                <div class="glass-form">
+                    <div class="mb-4">
+                        <h3 class="fw-bold serif-font">Send a Message</h3>
+                        <p class="text-muted">We usually respond within 2 hours.</p>
+                    </div>
+                    <form id="contactForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Name</label>
+                                <input type="text" class="form-control" placeholder="Nayan" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Email</label>
+                                <input type="email" class="form-control" placeholder="nayan@gmail.com" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Subject</label>
+                                <select class="form-select">
+                                    <option>General Inquiry</option>
+                                    <option>Venue Listing Support</option>
+                                    <option>Booking Issue</option>
+                                    <option>Refund Request</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Message</label>
+                                <textarea class="form-control" rows="5" placeholder="How can we help you?" required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold">Send Message</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-5" data-aos="fade-left">
+                <h3 class="fw-bold serif-font mb-4">Frequently Asked Questions</h3>
+                
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                How do I book a venue?
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Simply browse our "Venues" page, select your preferred hall, check availability for your date, and proceed to checkout. You can pay online or at the venue.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                What is the cancellation policy?
+                            </button>
+                        </h2>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                You can cancel your booking up to 24 hours before the event start time for a full refund. Cancellations within 24 hours may incur a small fee.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                Can I visit the venue before booking?
+                            </button>
+                        </h2>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes! On every venue page, there is a "Contact Owner" button. You can schedule a site visit directly with the venue manager before finalizing.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                Do you offer catering services?
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Many of our listed venues offer in-house catering. You can also select "Catering" as an add-on service during the booking process on our platform.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 rounded-4 overflow-hidden shadow-sm" style="height: 200px;">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m13!1m8!1m3!1d14874.916393730824!2d72.8627967!3d21.2425884!3m2!1i1024!2i768!4f13.1!3m2!1m1!2s!5e0!3m2!1sen!2sin!4v1770710081922!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0 text-white-50">&copy; 2026 EventHallBook. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        AOS.init({ duration: 800, once: true });
+
+        document.getElementById('contactForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Show Loading
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'Sending...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Message Sent!',
+                    text: 'We will get back to you shortly.',
+                    confirmButtonColor: '#4f46e5'
+                });
+                
+                e.target.reset();
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

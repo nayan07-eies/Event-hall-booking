@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings | EventHallBook</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root { --primary: #4f46e5; --dark: #0f172a; }
+        body { font-family: 'Outfit', sans-serif; background-color: #f1f5f9; min-height: 100vh; }
+        h1, h2, h3, h4, .serif-font { font-family: 'Playfair Display', serif; }
+        .navbar { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        
+        .booking-item { border: 1px solid #f1f5f9; border-radius: 16px; padding: 1.5rem; transition: 0.3s; background: #fff; position: relative; overflow: hidden; margin-bottom: 15px;}
+        .booking-item:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.05); border-color: #e2e8f0; }
+        .booking-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--primary); }
+        .status-badge { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 6px 12px; border-radius: 30px; }
+        .bg-paid { background: #dcfce7; color: #166534; }
+        .bg-pending { background: #fef9c3; color: #854d0e; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-4 text-dark" href="index.html">
+                <i class="bi bi-arrow-left-circle-fill text-primary me-2"></i> Back to Home
+            </a>
+            <div>
+                <a href="profile.html" class="btn btn-outline-primary btn-sm rounded-pill px-4 me-2">My Profile</a>
+                <button onclick="logout()" class="btn btn-danger btn-sm rounded-pill px-4">Sign Out</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container d-flex justify-content-center" style="margin-top: 120px; margin-bottom: 50px;">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold serif-font mb-0">Booking History</h2>
+                <a href="index.html#venuesSection" class="btn btn-primary rounded-pill btn-sm">
+                    <i class="bi bi-plus-lg"></i> Book New Venue
+                </a>
+            </div>
+
+            <div id="bookingsList" class="vstack gap-3">
+                </div>
+
+            <div id="emptyState" class="text-center py-5 d-none bg-white rounded-4 border">
+                <img src="https://cdn-icons-png.flaticon.com/512/7486/7486747.png" width="120" class="mb-3 opacity-50">
+                <h5 class="text-muted">No bookings yet</h5>
+                <p class="text-muted small">Your journey to a memorable event starts here.</p>
+                <a href="index.html#venuesSection" class="btn btn-primary mt-2">Browse Venues</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="receipt-container" style="position: absolute; left: -9999px;">
+        <div id="receiptTemplate" style="width: 700px; padding: 40px; background: white; font-family: 'Helvetica', sans-serif; color: #333;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 30px;">
+                <div><h2 style="color: #4f46e5; margin: 0; font-family: serif;">EventHallBook</h2><p style="margin: 5px 0 0; color: #666; font-size: 14px;">Premium Venue Reservations</p></div>
+                <div style="text-align: right;"><h3 style="margin: 0; color: #333;">DUPLICATE INVOICE</h3><p style="margin: 5px 0 0; color: #666; font-size: 14px;">#<span id="r-id"></span></p><p style="margin: 2px 0 0; color: #666; font-size: 14px;">Downloaded: <span id="r-gen-date"></span></p></div>
+            </div>
+            <div style="margin-bottom: 30px; display: flex; justify-content: space-between;">
+                <div><strong style="color: #4f46e5; display: block; margin-bottom: 5px;">Billed To:</strong><span id="r-name" style="font-size: 16px;"></span><br><span id="r-phone" style="color: #666; font-size: 14px;"></span></div>
+                <div style="text-align: right;"><strong style="color: #4f46e5; display: block; margin-bottom: 5px;">Event Details:</strong><span id="r-venue" style="font-weight: bold;"></span><br><span style="color: #666; font-size: 14px;">Date: <span id="r-date"></span></span><br><span style="color: #666; font-size: 14px;">Slot: <span id="r-time"></span></span></div>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                <thead><tr style="background-color: #f8fafc; color: #475569;"><th style="text-align: left; padding: 12px; border-bottom: 1px solid #e2e8f0;">Description</th><th style="text-align: right; padding: 12px; border-bottom: 1px solid #e2e8f0;">Amount</th></tr></thead>
+                <tbody><tr><td style="padding: 12px; border-bottom: 1px solid #eee;"><strong>Venue Rental & Packages</strong><br><div id="r-addon-list" style="font-size: 12px; color: #64748b; margin-top: 5px; padding-left: 8px; line-height: 1.4;"></div></td><td style="text-align: right; padding: 12px; border-bottom: 1px solid #eee; vertical-align: top;" id="r-amount"></td></tr></tbody>
+            </table>
+            <div style="text-align: right;"><h2 style="color: #4f46e5; margin: 0;">Total: <span id="r-total"></span></h2><p style="margin: 5px 0 0; font-size: 14px; color: #666;">Payment Status: <strong id="r-status" style="text-transform: uppercase;"></strong></p></div>
+            <div style="margin-top: 50px; text-align: center; font-size: 12px; color: #94a3b8;">Thank you for choosing EventHallBook.</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentUser = null;
+        let myBookings = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userDataStr = localStorage.getItem('userData');
+            const token = localStorage.getItem('authToken');
+            if (!userDataStr || !token) return window.location.href = 'login.html';
+
+            currentUser = JSON.parse(userDataStr);
+            await fetchMyBookings(token);
+        });
+
+        async function fetchMyBookings(token) {
+            try {
+                const response = await fetch('http://localhost:3000/api/my-bookings', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    myBookings = await response.json();
+                    renderBookings();
+                } else throw new Error('Failed');
+            } catch (error) {
+                document.getElementById('bookingsList').innerHTML = '<div class="alert alert-danger">Error loading bookings.</div>';
+            }
+        }
+
+        function renderBookings() {
+            const container = document.getElementById('bookingsList');
+            const empty = document.getElementById('emptyState');
+            container.innerHTML = '';
+
+            if(myBookings.length === 0) {
+                empty.classList.remove('d-none');
+                return;
+            }
+            empty.classList.add('d-none');
+
+            myBookings.forEach(b => {
+                const statusBadge = b.status === 'Confirmed' || b.status === 'Paid' 
+                    ? '<span class="status-badge bg-paid"><i class="bi bi-check-circle-fill me-1"></i> Confirmed</span>' 
+                    : '<span class="status-badge bg-pending"><i class="bi bi-hourglass-split me-1"></i> Pending</span>';
+
+                container.innerHTML += `
+                    <div class="booking-item d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-light rounded p-3 text-center" style="min-width: 80px;">
+                                <div class="fw-bold text-danger h4 mb-0">${new Date(b.date).getDate()}</div>
+                                <div class="small text-uppercase fw-bold text-muted" style="font-size: 10px;">${new Date(b.date).toLocaleString('default', {month:'short'})}</div>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold text-dark mb-1">${b.venue || b.hall}</h5>
+                                <div class="text-muted small mb-1">ID: <span class="font-monospace">${b.id}</span></div>
+                                <div class="text-muted small mb-2">Slot: <strong>${b.timeSlot || 'Full Day'}</strong></div>
+                                ${statusBadge}
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-4 mt-3 mt-md-0">
+                            <div class="text-md-end">
+                                <div class="fw-bold h5 mb-0 text-primary">₹${parseInt(b.amount).toLocaleString()}</div>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-light border rounded-circle" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
+                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow">
+                                    <li><a class="dropdown-item" href="#" onclick="downloadReceipt('${b.id}')"><i class="bi bi-download me-2"></i>Download Receipt</a></li>
+                                    <li><a class="dropdown-item text-danger" href="#" onclick="cancelBooking('${b.id}')"><i class="bi bi-x-circle me-2"></i>Cancel Booking</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        // --- Cancellation and PDF Generation ---
+        function cancelBooking(id) {
+            const token = localStorage.getItem('authToken');
+            Swal.fire({
+                title: 'Cancel Booking?', text: "Refunds take 3-5 business days.", icon: 'warning',
+                showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Yes, Cancel'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`http://localhost:3000/api/bookings/${id}`, {
+                            method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (response.ok) {
+                            myBookings = myBookings.filter(b => b.id !== id);
+                            renderBookings();
+                            Swal.fire('Cancelled', 'Booking removed.', 'success');
+                        } else throw new Error('Failed to cancel');
+                    } catch (error) {
+                        Swal.fire('Error', 'Could not cancel booking.', 'error');
+                    }
+                }
+            });
+        }
+
+        function downloadReceipt(id) {
+            const b = myBookings.find(x => x.id === id);
+            if (!b) return;
+
+            document.getElementById('r-id').innerText = b.id;
+            document.getElementById('r-name').innerText = b.customer || currentUser.name;
+            document.getElementById('r-phone').innerText = b.phone || currentUser.phone || 'N/A';
+            document.getElementById('r-venue').innerText = b.venue || b.hall;
+            document.getElementById('r-date').innerText = b.date;
+            document.getElementById('r-time').innerText = b.timeSlot || 'Full Day';
+            document.getElementById('r-amount').innerText = "₹" + parseInt(b.amount).toLocaleString();
+            document.getElementById('r-total').innerText = "₹" + parseInt(b.amount).toLocaleString();
+            document.getElementById('r-status').innerText = b.status;
+            document.getElementById('r-gen-date').innerText = new Date().toLocaleDateString();
+
+            const pdfAddonList = document.getElementById('r-addon-list');
+            if (b.addons && b.addons.length > 0) {
+                pdfAddonList.innerHTML = '• ' + b.addons.join('<br>• ');
+            } else {
+                pdfAddonList.innerHTML = 'Base Venue Rental Only';
+            }
+
+            const element = document.getElementById('receiptTemplate');
+            const opt = { 
+                margin: 0.5, filename: `Receipt_${id}.pdf`, image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { scale: 2, scrollY: 0 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } 
+            };
+
+            Swal.fire({ title: 'Generating PDF...', timer: 1000, didOpen: () => { Swal.showLoading() } });
+            
+            const container = document.getElementById('receipt-container');
+            container.style.left = '0'; 
+            container.style.zIndex = '-9999';
+            
+            html2pdf().set(opt).from(element).save().then(() => { 
+                container.style.left = '-9999px'; 
+            });
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

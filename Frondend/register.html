@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join EventHallBook | Luxury Venue Reservations</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #ec4899;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.95);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #f1f5f9;
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        h1, h2, h3, h4, .serif-font { font-family: 'Playfair Display', serif; }
+
+        /* Card Styling */
+        .auth-card {
+            border: none;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            background: white;
+            max-width: 1000px;
+            width: 95%;
+            margin: 20px;
+        }
+
+        /* Left Banner Section */
+        .auth-banner {
+            background: url('https://images.unsplash.com/photo-1519225468359-69632974a1d2?q=80&w=2070&auto=format&fit=crop') no-repeat center center/cover;
+            position: relative;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 3rem;
+        }
+
+        .banner-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.9));
+            z-index: 1;
+        }
+
+        .banner-content { position: relative; z-index: 2; }
+
+        /* Form Inputs matching Index Theme */
+        .form-control {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            background-color: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        .input-group-text {
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--primary);
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-light:hover {
+            background-color: white;
+            color: var(--dark);
+        }
+
+        /* Strength Meter */
+        .progress { height: 6px; border-radius: 10px; background-color: #e2e8f0; }
+        
+        /* OTP Input */
+        .otp-input {
+            letter-spacing: 0.5em;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-card">
+        <div class="row g-0">
+            <div class="col-lg-5 auth-banner d-none d-lg-flex">
+                <div class="banner-overlay"></div>
+                
+                <div class="banner-content">
+                    <div class="d-flex align-items-center gap-2 mb-4">
+                        <i class="bi bi-gem fs-4 text-white"></i>
+                        <span class="fw-bold fs-5">EventHall<span class="text-info">Book</span></span>
+                    </div>
+                    
+                    <div class="mb-5">
+                        <h2 class="display-5 fw-bold mb-3 serif-font">Join the <br>Elegance.</h2>
+                        <p class="opacity-75 lead">Unlock exclusive access to premium venues, seamless booking, and personalized event planning.</p>
+                    </div>
+                </div>
+
+                <div class="banner-content">
+                    <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                        <div class="d-flex gap-3 align-items-center">
+                            <div class="bg-white text-dark rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-quote fs-5"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0 small fst-italic">"The most seamless booking experience I've ever had."</p>
+                                <small class="text-info fw-bold">- Sarah J., Wedding Planner</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7 bg-white p-4 p-md-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-bold m-0 serif-font text-dark">Create Account</h3>
+                    <a href="login.html" class="text-decoration-none small text-muted">Already a member? <span class="text-primary fw-bold">Login</span></a>
+                </div>
+
+                <form id="registrationForm">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase">Full Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person text-muted"></i></span>
+                            <input type="text" id="regName" class="form-control" placeholder="e.g. Nayan" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope text-muted"></i></span>
+                            <input type="email" id="regEmail" class="form-control" placeholder="nayan@gmail.com" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase">Mobile Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text">+91</span>
+                            <input type="tel" id="phoneInput" class="form-control" placeholder="91223 67890" maxlength="10" required>
+                            <button class="btn btn-outline-primary px-3" type="button" onclick="sendVerification(event, 'phone')">Send OTP</button>
+                        </div>
+                    </div>
+
+                    <div id="otpSection" class="mb-4 p-3 rounded-3 bg-light border border-dashed" style="display:none;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="small fw-bold text-dark m-0">Enter OTP Code</label>
+                            <span class="badge bg-danger">Expiring in <span id="timer">300</span>s</span>
+                        </div>
+                        <input type="text" class="form-control otp-input mb-2" maxlength="6" placeholder="*******">
+                        <button type="button" class="btn btn-primary w-100 btn-sm rounded-pill" onclick="verifyOTP(event)">Confirm OTP</button>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-muted small fw-bold text-uppercase">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock text-muted"></i></span>
+                            <input type="password" id="pwInput" class="form-control border-end-0" placeholder="Create a strong password" required>
+                            <span class="input-group-text bg-white border-start-0" style="cursor: pointer;" onclick="togglePassword()">
+                                <i id="toggleIcon" class="bi bi-eye text-muted"></i>
+                            </span>
+                        </div>
+                        
+                        <div class="mt-2 d-flex align-items-center gap-2">
+                            <div class="progress flex-grow-1">
+                                <div id="strengthBar" class="progress-bar" role="progressbar" style="width: 0%;"></div>
+                            </div>
+                            <span id="strengthText" class="small text-muted" style="min-width: 60px; text-align: right;">Weak</span>
+                        </div>
+                        <div class="d-flex gap-3 mt-1">
+                            <small id="reqChar" class="text-muted"><i class="bi bi-dot"></i> 8+ Characters</small>
+                            <small id="reqNum" class="text-muted"><i class="bi bi-dot"></i> Number</small>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold fs-6 shadow-sm">
+                        Create Account <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                    
+                    <p class="text-center text-muted small mt-4 mb-0">
+                        By registering, you agree to our <a href="#" class="text-decoration-none">Terms</a> & <a href="#" class="text-decoration-none">Privacy Policy</a>.
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="successModal" data-bs-backdrop="static" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow-lg text-center p-5">
+                <div class="mb-3 text-primary">
+                    <i class="bi bi-envelope-check display-1"></i> 
+                </div>
+                <h2 class="fw-bold serif-font mb-2">Check Your Inbox!</h2>
+                <p class="text-muted mb-4">We've sent a verification link to your email. Please click the link to activate your account before logging in.</p>
+                <a href="login.html" class="btn btn-primary rounded-pill px-5 py-2 fw-bold">Go to Login</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // --- Global Variables ---
+        let isPhoneVerifiedStatus = false; // Tracks if the user completed the OTP step
+
+        // --- Password Logic ---
+        const pwInput = document.getElementById('pwInput');
+        const bar = document.getElementById('strengthBar');
+        const text = document.getElementById('strengthText');
+        const reqChar = document.getElementById('reqChar');
+        const reqNum = document.getElementById('reqNum');
+
+        pwInput.addEventListener('input', function() {
+            const val = pwInput.value;
+            let score = 0;
+
+            if (val.length >= 8) { 
+                score += 30; 
+                reqChar.className = "small text-success fw-bold";
+                reqChar.innerHTML = '<i class="bi bi-check"></i> 8+ Characters';
+            } else { 
+                reqChar.className = "small text-muted";
+                reqChar.innerHTML = '<i class="bi bi-dot"></i> 8+ Characters';
+            }
+
+            if (/\d/.test(val)) { 
+                score += 30; 
+                reqNum.className = "small text-success fw-bold";
+                reqNum.innerHTML = '<i class="bi bi-check"></i> Number';
+            } else { 
+                reqNum.className = "small text-muted";
+                reqNum.innerHTML = '<i class="bi bi-dot"></i> Number';
+            }
+
+            if (/[!@#$%^&*A-Z]/.test(val)) score += 40;
+
+            bar.style.width = score + "%";
+            if (score < 40) { 
+                bar.className = "progress-bar bg-danger"; 
+                text.innerText = "Weak";
+            } else if (score < 80) { 
+                bar.className = "progress-bar bg-warning"; 
+                text.innerText = "Medium";
+            } else { 
+                bar.className = "progress-bar bg-success"; 
+                text.innerText = "Strong";
+            }
+        });
+
+        function togglePassword() {
+            const icon = document.getElementById('toggleIcon');
+            if (pwInput.type === 'password') {
+                pwInput.type = 'text';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                pwInput.type = 'password';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        }
+
+        // --- REAL PHONE OTP LOGIC ---
+        async function sendVerification(event, type) {
+            if (type === 'phone') {
+                const phoneInput = document.getElementById('phoneInput').value;
+                const btn = event.currentTarget;
+
+                if (phoneInput.length !== 10) {
+                    Swal.fire({ icon: 'warning', title: 'Invalid Number', text: 'Please enter a 10-digit mobile number.' });
+                    return;
+                }
+
+                // Loading UI
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+                btn.disabled = true;
+
+                try {
+                    const response = await fetch('http://localhost:3000/api/send-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ phone: phoneInput })
+                    });
+
+                    if (response.ok) {
+                        // Show the OTP input box
+                        document.getElementById('otpSection').style.display = 'block';
+                        
+                        const Toast = Swal.mixin({
+                            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000
+                        });
+                        Toast.fire({ icon: 'success', title: 'OTP Sent successfully!' });
+                        
+                        btn.innerHTML = 'Sent';
+                    } else {
+                        const data = await response.json();
+                        throw new Error(data.message);
+                    }
+                } catch (error) {
+                    Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'Failed to send OTP' });
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            }
+        }
+
+        async function verifyOTP(event) {
+            const phoneInput = document.getElementById('phoneInput').value;
+            const otpInput = document.querySelector('.otp-input').value;
+            const btn = event.currentTarget;
+
+            if (otpInput.length !== 6) {
+                Swal.fire({ icon: 'warning', title: 'Invalid OTP', text: 'Please enter the 6-digit code.' });
+                return;
+            }
+
+            // Loading UI
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('http://localhost:3000/api/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: phoneInput, otp: otpInput })
+                });
+
+                if (response.ok) {
+                    // Success! Lock the verification status
+                    isPhoneVerifiedStatus = true;
+                    
+                    const otpDiv = document.getElementById('otpSection');
+                    otpDiv.innerHTML = `
+                        <div class="alert alert-success d-flex align-items-center mb-0 border-0 bg-success-subtle text-success">
+                            <i class="bi bi-patch-check-fill me-2 fs-5"></i>
+                            <div><strong>Verified!</strong> Mobile number linked.</div>
+                        </div>`;
+                    
+                    // Lock the phone input so they can't change it after verifying
+                    document.getElementById('phoneInput').readOnly = true;
+                } else {
+                    const data = await response.json();
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'Invalid OTP' });
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // --- REAL MONGODB REGISTRATION LOGIC ---
+        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const phone = document.getElementById('phoneInput').value; // Now grabs the phone number
+            const password = document.getElementById('pwInput').value;
+            const submitBtn = document.querySelector('#registrationForm button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+
+            // 1. Guard: Check if phone is verified
+            if (!isPhoneVerifiedStatus) {
+                Swal.fire({
+                    icon: 'warning', 
+                    title: 'Verification Required',
+                    text: 'Please send and confirm the OTP for your mobile number before creating your account.',
+                    confirmButtonColor: '#4f46e5'
+                });
+                return; 
+            }
+
+            // 2. Guard: Password Validation
+            if(password.length < 8) {
+                Swal.fire({
+                    icon: 'warning', title: 'Password too weak',
+                    text: 'Please ensure password is at least 8 characters.',
+                    confirmButtonColor: '#4f46e5'
+                });
+                return;
+            }
+
+            // Loading State
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Creating...';
+            submitBtn.disabled = true;
+
+            try {
+                // 3. Send all data (including phone) to Node.js backend
+                const regResponse = await fetch('http://localhost:3000/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, phone, password, role: 'user' }) // phone is included!
+                });
+
+                const regData = await regResponse.json();
+
+                if (regResponse.ok) {
+                    // 4. Success! Show the email check modal
+                    new bootstrap.Modal(document.getElementById('successModal')).show();
+                    
+                } else {
+                    // Backend rejected (e.g., Email already exists)
+                    Swal.fire({
+                        icon: 'error', title: 'Registration Failed',
+                        text: regData.message || 'This email is already registered.',
+                        confirmButtonColor: '#4f46e5'
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error', title: 'Server Error',
+                    text: 'Could not connect to the server. Is Node.js running?',
+                    confirmButtonColor: '#4f46e5'
+                });
+                console.error('Registration error:', error);
+            } finally {
+                // Reset button state
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

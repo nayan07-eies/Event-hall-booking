@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard | EventHallBook</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.95);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #f1f5f9;
+            color: var(--dark);
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+            min-height: 100vh;
+        }
+
+        .serif-font { font-family: 'Playfair Display', serif; }
+
+        /* Sidebar */
+        .sidebar {
+            background: white;
+            min-height: 100vh;
+            border-right: 1px solid #e2e8f0;
+            position: fixed;
+            width: 260px;
+            z-index: 1000;
+            padding-top: 2rem;
+            transition: 0.3s;
+        }
+
+        .nav-link {
+            color: #64748b;
+            font-weight: 600;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.3s;
+            border-right: 3px solid transparent;
+            cursor: pointer;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary);
+            background: #f8fafc;
+            border-right-color: var(--primary);
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 2rem;
+            transition: 0.3s;
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+        }
+
+        /* Stat Card */
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+
+        .stat-icon {
+            width: 50px; height: 50px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        /* Table */
+        .table-custom th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            font-weight: 700;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 1rem;
+        }
+        
+        .table-custom td {
+            vertical-align: middle;
+            padding: 1rem 0.5rem;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .badge-soft {
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .bg-paid { background: #dcfce7; color: #166534; }
+        .bg-pending { background: #fef9c3; color: #854d0e; }
+
+        /* Calendar Styles Ported from Admin */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+        .calendar-day { 
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center; 
+            border-radius: 8px; font-size: 0.85rem; cursor: pointer;
+        }
+        .calendar-day:hover { background: #e0e7ff; }
+        .calendar-day.has-event { background: #c7d2fe; color: var(--primary); font-weight: bold; position: relative; }
+        .calendar-day.has-event::after {
+            content: ''; position: absolute; bottom: 3px; width: 4px; height: 4px; background: var(--primary); border-radius: 50%;
+        }
+
+        /* Important for Tab Switching */
+        .hide-section { display: none !important; }
+
+        @media (max-width: 991px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.show { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="btn btn-primary d-lg-none position-fixed bottom-0 end-0 m-3 rounded-circle shadow p-3 z-3" onclick="document.querySelector('.sidebar').classList.toggle('show')">
+        <i class="bi bi-list fs-4"></i>
+    </button>
+
+    <div class="sidebar">
+        <div class="px-4 mb-5">
+            <h4 class="fw-bold serif-font text-dark mb-0">EventHall<span class="text-primary">Book</span></h4>
+            <small class="text-muted">Partner Panel</small>
+        </div>
+
+        <nav class="nav flex-column">
+            <a class="nav-link active" onclick="switchTab('dashboard', this)"><i class="bi bi-grid-fill"></i> Dashboard</a>
+            <a class="nav-link" onclick="switchTab('calendar', this)"><i class="bi bi-calendar-event"></i> My Calendar</a>
+            <a class="nav-link" onclick="switchTab('venue', this)"><i class="bi bi-shop"></i> Manage Venues</a>
+            <a class="nav-link" onclick="switchTab('earnings', this)"><i class="bi bi-wallet2"></i> Earnings</a>
+            
+            <div class="mt-5 px-4">
+                <hr class="text-muted">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="bg-light rounded-circle p-2"><i class="bi bi-person text-primary"></i></div>
+                    <div>
+                        <div class="fw-bold small" id="ownerNameDisplay">Owner</div>
+                        <div class="text-muted x-small" style="font-size:10px" id="venueNameDisplay">Loading...</div>
+                    </div>
+                </div>
+                <button onclick="logout()" class="btn btn-outline-danger btn-sm w-100 rounded-pill">Sign Out</button>
+            </div>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        
+        <div id="section-dashboard">
+            <div class="d-flex justify-content-between align-items-end mb-5">
+                <div>
+                    <h2 class="fw-bold serif-font mb-1">Dashboard</h2>
+                    <p class="text-muted mb-0">Overview for <span class="text-primary fw-bold" id="pageVenueName">your venues</span></p>
+                </div>
+                <button class="btn btn-primary rounded-pill px-4 shadow-sm" onclick="downloadReport()">
+                    <i class="bi bi-download me-2"></i> Export Report
+                </button>
+            </div>
+
+            <div class="row g-4 mb-5">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-primary-subtle text-primary"><i class="bi bi-calendar-check"></i></div>
+                        <div>
+                            <h3 class="fw-bold mb-0" id="totalBookings">0</h3>
+                            <div class="text-muted small">Total Bookings</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-success-subtle text-success"><i class="bi bi-currency-rupee"></i></div>
+                        <div>
+                            <h3 class="fw-bold mb-0" id="totalRevenue">₹0</h3>
+                            <div class="text-muted small">Total Revenue</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-warning-subtle text-warning"><i class="bi bi-hourglass-split"></i></div>
+                        <div>
+                            <h3 class="fw-bold mb-0" id="pendingCount">0</h3>
+                            <div class="text-muted small">Pending Payments</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+                    <h5 class="fw-bold mb-0">Recent Reservations</h5>
+                    <div class="d-flex gap-2">
+                        <div class="input-group w-auto">
+                            <input type="text" class="form-control form-control-sm border-end-0" placeholder="Search ID..." id="searchInput">
+                            <span class="input-group-text bg-white border-start-0"><i class="bi bi-search"></i></span>
+                        </div>
+                        <button class="btn btn-primary btn-sm" onclick="openBookingModal()">
+                            <i class="bi bi-plus-lg me-1"></i> New
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-custom table-hover">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookingsTableBody">
+                            </tbody>
+                    </table>
+                </div>
+                
+                <div id="noDataMsg" class="text-center py-5 text-muted" style="display:none;">
+                    <i class="bi bi-inbox fs-1 d-block mb-2 opacity-50"></i>
+                    No bookings found for your venue yet.
+                </div>
+            </div>
+        </div>
+
+        <div id="section-calendar" class="hide-section">
+            <h2 class="fw-bold serif-font mb-4">My Calendar</h2>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="glass-card">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4 class="fw-bold mb-0" id="calMonth">...</h4>
+                            <div>
+                                <button class="btn btn-sm btn-light border" onclick="changeMonth(-1)"><i class="bi bi-chevron-left"></i></button>
+                                <button class="btn btn-sm btn-light border" onclick="changeMonth(1)"><i class="bi bi-chevron-right"></i></button>
+                            </div>
+                        </div>
+                        <div class="calendar-grid mb-2 text-muted small fw-bold">
+                            <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+                        </div>
+                        <div class="calendar-grid" id="calendarGrid"></div>
+                        <div class="mt-4 pt-3 border-top small text-muted">
+                            <span class="text-primary fw-bold">•</span> Indicates booked dates for your venue
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-venue" class="hide-section">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold serif-font mb-0">Manage Venues</h2>
+                <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#venueModal">
+                    <i class="bi bi-plus-lg me-2"></i> Add Venue
+                </button>
+            </div>
+            
+            <div class="row g-4" id="venueGrid">
+                </div>
+        </div>
+
+        <div id="section-earnings" class="hide-section">
+            <h2 class="fw-bold serif-font mb-4">Earnings & Payouts</h2>
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="glass-card">
+                        <h5 class="fw-bold mb-4">Revenue Analytics</h5>
+                        <div style="height: 300px;">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="glass-card">
+                        <h5 class="fw-bold mb-4">Payout Status</h5>
+                        <div class="d-flex justify-content-between mb-3 border-bottom pb-3">
+                            <span class="text-muted fw-bold">Available to Payout</span>
+                            <span class="fw-bold text-success fs-5" id="availablePayout">₹0</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-4">
+                            <span class="text-muted fw-bold">Pending Clearance</span>
+                            <span class="fw-bold text-warning fs-5" id="pendingClearance">₹0</span>
+                        </div>
+                        <button class="btn btn-primary w-100 rounded-pill py-2" onclick="requestPayout()">
+                            Request Payout <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <div class="modal fade" id="bookingModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold" id="bModalTitle">New Reservation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="bookingForm">
+                        <input type="hidden" id="bId">
+                        <div class="mb-3">
+                            <label class="small fw-bold text-muted">Customer Name</label>
+                            <input type="text" id="bCust" class="form-control" required>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="small fw-bold text-muted">Phone</label>
+                                <input type="text" id="bPhone" class="form-control" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="small fw-bold text-muted">Date</label>
+                                <input type="date" id="bDate" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="small fw-bold text-muted">Venue</label>
+                            <select id="bVenue" class="form-select">
+                                </select>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="small fw-bold text-muted">Amount (₹)</label>
+                                <input type="number" id="bAmount" class="form-control" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="small fw-bold text-muted">Status</label>
+                                <select id="bStatus" class="form-select">
+                                    <option value="Paid">Paid</option>
+                                    <option value="Pending Payment">Pending</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveBooking()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="venueModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold">Add New Venue</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="venueForm">
+                        <div class="mb-3">
+                            <label class="small fw-bold text-muted">Venue Name</label>
+                            <input type="text" id="vName" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="small fw-bold text-muted">Image URL</label>
+                            <input type="url" id="vImg" class="form-control" placeholder="https://..." required>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="small fw-bold text-muted">Price/Hr (₹)</label>
+                                <input type="number" id="vPrice" class="form-control" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="small fw-bold text-muted">Capacity</label>
+                                <input type="number" id="vCap" class="form-control" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-primary w-100" onclick="saveVenue()">Publish Venue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // --- State Variables ---
+        let myBookings = []; 
+        let venues = []; 
+        let currentDate = new Date(); 
+        let chartInstance = null; 
+
+        // --- 1. Tab Switching Logic ---
+        function switchTab(tabName, linkElement) {
+            document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            linkElement.classList.add('active');
+
+            document.getElementById('section-dashboard').classList.add('hide-section');
+            document.getElementById('section-calendar').classList.add('hide-section');
+            document.getElementById('section-venue').classList.add('hide-section');
+            document.getElementById('section-earnings').classList.add('hide-section');
+
+            document.getElementById(`section-${tabName}`).classList.remove('hide-section');
+
+            if(tabName === 'venue') renderVenues();
+            if(tabName === 'earnings') renderChart(); 
+
+            if (window.innerWidth <= 991) {
+                document.querySelector('.sidebar').classList.remove('show');
+            }
+        }
+
+        // --- 2. Security & Initialization ---
+        const token = localStorage.getItem('authToken');
+        let currentUser = JSON.parse(localStorage.getItem('userData'));
+        
+        if (!token || !currentUser) {
+            window.location.href = 'login.html';
+        }
+
+        // Security check
+        if (currentUser.role !== 'owner') {
+            alert('Access Denied: Owner privileges required.');
+            window.location.href = 'index.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('ownerNameDisplay').innerText = currentUser.name;
+            // The venue names will be dynamically populated once they are fetched from MongoDB!
+            
+            loadDashboardData();
+            loadMyVenues(); 
+        });
+
+        // --- 3. Fetch Data from MongoDB ---
+        async function loadDashboardData() {
+            try {
+                // Notice: The URL is now clean. The token does all the work!
+                const response = await fetch('http://localhost:3000/api/owner/bookings', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    myBookings = await response.json();
+                    renderDashboard(); 
+                } else {
+                    if (response.status === 401 || response.status === 403) {
+                        Swal.fire('Session Expired', 'Please log in again.', 'warning').then(() => logout());
+                    }
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                Swal.fire('Error', 'Failed to connect to server.', 'error');
+            }
+        }
+
+        async function loadMyVenues() {
+            try {
+                // MUST BE /api/owner/venues (NOT /api/venues)
+                const response = await fetch('http://localhost:3000/api/owner/venues', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`, 
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    venues = await response.json();
+                    
+                    // --- DYNAMICALLY UPDATE UI WITH VENUE NAMES ---
+                    if(venues.length > 0) {
+                        const venueNamesList = venues.map(v => v.name).join(', ');
+                        // Update Sidebar
+                        document.getElementById('venueNameDisplay').innerText = venueNamesList.length > 25 ? venueNamesList.substring(0, 25) + '...' : venueNamesList;
+                        // Update Dashboard Header
+                        document.getElementById('pageVenueName').innerText = venues.map(v => v.name).join(' & ');
+                    } else {
+                        document.getElementById('venueNameDisplay').innerText = "No Venues Assigned";
+                        document.getElementById('pageVenueName').innerText = "your venues";
+                    }
+
+                    renderVenues(); 
+                } else {
+                    console.error("Failed to load owner venues");
+                }
+            } catch (error) {
+                console.error('Network error fetching my venues:', error);
+            }
+        }
+
+        // --- 4. Render UI (Dashboard, Calendar, Chart) ---
+        function renderDashboard() {
+            let totalRev = 0;
+            let pendingRev = 0;
+            let pendingCount = 0;
+
+            myBookings.forEach(b => {
+                const amt = parseInt(b.amount) || 0;
+                totalRev += amt;
+                
+                if (b.status === 'Pending Payment' || b.status === 'Pending') {
+                    pendingCount++;
+                    pendingRev += amt;
+                }
+            });
+
+            document.getElementById('totalBookings').innerText = myBookings.length;
+            document.getElementById('totalRevenue').innerText = `₹${totalRev.toLocaleString()}`;
+            document.getElementById('pendingCount').innerText = pendingCount;
+
+            document.getElementById('availablePayout').innerText = `₹${(totalRev - pendingRev).toLocaleString()}`;
+            document.getElementById('pendingClearance').innerText = `₹${pendingRev.toLocaleString()}`;
+
+            const tbody = document.getElementById('bookingsTableBody');
+            tbody.innerHTML = '';
+
+            if (myBookings.length === 0) {
+                document.getElementById('noDataMsg').style.display = 'block';
+            } else {
+                document.getElementById('noDataMsg').style.display = 'none';
+            }
+
+            [...myBookings].reverse().forEach(b => {
+                const isPaid = b.status === 'Paid' || b.status === 'Confirmed';
+                const statusClass = isPaid ? 'bg-paid' : 'bg-pending';
+                const statusIcon = isPaid ? 'bi-check-circle-fill' : 'bi-clock-fill';
+
+                const row = `
+                    <tr>
+                        <td><span class="fw-bold text-primary">#${b.id.toString().substring(0,6)}</span></td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="bg-light rounded-circle p-1" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="bi bi-person text-muted"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark small">${b.customer}</div>
+                                    <div class="text-muted small" style="font-size: 11px">${b.phone || 'N/A'}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${b.date}</td>
+                        <td class="fw-bold">₹${parseInt(b.amount || 0).toLocaleString()}</td>
+                        <td><span class="badge badge-soft ${statusClass}"><i class="bi ${statusIcon} me-1"></i> ${b.status}</span></td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-light border text-primary" onclick="openBookingModal('${b.id}')"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-light border text-danger" onclick="deleteBooking('${b.id}')"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+
+            renderCalendar();
+            renderChart();
+        }
+
+        // --- NEW BOOKING LOGIC ---
+        function openBookingModal(id = null) {
+            const vSelect = document.getElementById('bVenue');
+            vSelect.innerHTML = venues.map(v => `<option value="${v.name}">${v.name}</option>`).join('');
+
+            if(id) {
+                const b = myBookings.find(x => x.id === id);
+                document.getElementById('bId').value = b.id;
+                document.getElementById('bCust').value = b.customer;
+                document.getElementById('bPhone').value = b.phone || '';
+                document.getElementById('bDate').value = b.date;
+                document.getElementById('bVenue').value = b.hall || b.venue;
+                document.getElementById('bAmount').value = b.amount || '';
+                document.getElementById('bStatus').value = b.status;
+                document.getElementById('bModalTitle').innerText = "Edit Reservation";
+            } else {
+                document.getElementById('bookingForm').reset();
+                document.getElementById('bId').value = '';
+                document.getElementById('bModalTitle').innerText = "New Reservation";
+                
+                // Set default selected venue to the first one in the array
+                if(venues.length > 0) {
+                    document.getElementById('bVenue').value = venues[0].name;
+                }
+            }
+            new bootstrap.Modal(document.getElementById('bookingModal')).show();
+        }
+
+        async function saveBooking() {
+            const id = document.getElementById('bId').value;
+            const isEdit = !!id; 
+            
+            const bookingData = {
+                id: id || "BK-" + Date.now(),
+                customer: document.getElementById('bCust').value,
+                phone: document.getElementById('bPhone').value,
+                date: document.getElementById('bDate').value,
+                venue: document.getElementById('bVenue').value,
+                hall: document.getElementById('bVenue').value, 
+                amount: document.getElementById('bAmount').value,
+                status: document.getElementById('bStatus').value
+            };
+
+            try {
+                const method = isEdit ? 'PUT' : 'POST';
+                // USE THE OWNER API ROUTE
+                const url = isEdit 
+                    ? `http://localhost:3000/api/owner/bookings/${id}` 
+                    : `http://localhost:3000/api/owner/bookings`;
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`, 
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(bookingData)
+                });
+
+                if (response.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('bookingModal')).hide();
+                    Swal.fire({ icon: 'success', title: 'Saved Securely!', showConfirmButton: false, timer: 1000 });
+                    loadDashboardData(); // Refresh their bookings list
+                } else {
+                    const data = await response.json();
+                    Swal.fire('Error', data.message || 'Failed to save booking.', 'error');
+                }
+            } catch (error) {
+                console.error('Save booking error:', error);
+                Swal.fire('Error', 'Network error. Is your server running?', 'error');
+            }
+        }
+
+        function deleteBooking(id) {
+            Swal.fire({
+                title: 'Delete Booking?', text: "Cannot be undone!", icon: 'warning', 
+                showCancelButton: true, confirmButtonColor: '#d33'
+            }).then(async (res) => {
+                if(res.isConfirmed) {
+                    try {
+                        // USE THE OWNER API ROUTE
+                        const response = await fetch(`http://localhost:3000/api/owner/bookings/${id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${token}` 
+                            }
+                        });
+
+                        if (response.ok) {
+                            Swal.fire({ icon: 'success', title: 'Deleted!', showConfirmButton: false, timer: 1000 });
+                            loadDashboardData(); // Refresh their bookings list
+                        } else {
+                            const data = await response.json();
+                            Swal.fire('Error', data.message || 'Failed to delete booking.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Delete booking error:', error);
+                        Swal.fire('Error', 'Network error. Is your server running?', 'error');
+                    }
+                }
+            });
+        }
+
+        // --- CALENDAR FUNCTIONS ---
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const monthLabel = document.getElementById('calMonth');
+            if(!grid || !monthLabel) return;
+            
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            monthLabel.innerText = new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            let html = '';
+            for(let i=0; i<firstDay; i++) html += `<div></div>`;
+
+            for(let day=1; day<=daysInMonth; day++) {
+                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                const hasEvent = myBookings.some(b => b.date === dateStr);
+                html += `<div class="calendar-day ${hasEvent ? 'has-event' : ''}" onclick="filterBookingsByDate('${dateStr}')">${day}</div>`;
+            }
+            grid.innerHTML = html;
+        }
+
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function filterBookingsByDate(dateStr) {
+            document.getElementById('searchInput').value = dateStr;
+            switchTab('dashboard', document.querySelectorAll('.nav-link')[0]);
+            const event = new Event('keyup');
+            document.getElementById('searchInput').dispatchEvent(event);
+        }
+
+        // --- CHART FUNCTIONS ---
+        function renderChart() {
+            const canvas = document.getElementById('revenueChart');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            const labels = [];
+            const data = [];
+            
+            for(let i=5; i>=0; i--) {
+                const d = new Date();
+                d.setMonth(d.getMonth() - i);
+                const key = d.toISOString().slice(0, 7); 
+                labels.push(d.toLocaleString('default', { month: 'short' }));
+                
+                const monthSum = myBookings
+                    .filter(b => b.date.startsWith(key))
+                    .reduce((acc, curr) => acc + parseInt(curr.amount || 0), 0);
+                data.push(monthSum);
+            }
+
+            if(chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: data,
+                        backgroundColor: '#4f46e5',
+                        borderRadius: 6
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } }, 
+                    scales: { 
+                        x: { grid: { display: false } }, 
+                        y: { beginAtZero: true } 
+                    } 
+                }
+            });
+        }
+
+        // --- VENUE CRUD LOGIC ---
+        function renderVenues() {
+            const grid = document.getElementById('venueGrid');
+            if(!grid) return;
+
+            if (venues.length === 0) {
+                grid.innerHTML = `<div class="col-12 text-muted">No venues assigned to you yet. Add a new venue to get started!</div>`;
+                return;
+            }
+
+            grid.innerHTML = venues.map(v => `
+                <div class="col-md-4">
+                    <div class="glass-card p-0 overflow-hidden h-100">
+                        <img src="${v.img}" style="height: 150px; width: 100%; object-fit: cover;">
+                        <div class="p-3">
+                            <h5 class="fw-bold mb-1">${v.name}</h5>
+                            <div class="d-flex justify-content-between text-muted small mb-3">
+                                <span><i class="bi bi-people"></i> ${v.capacity} Cap</span>
+                                <span><i class="bi bi-tag"></i> ₹${v.price}/hr</span>
+                            </div>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle w-100 py-2 mb-2 d-block text-center">
+                                <i class="bi bi-check-circle me-1"></i> Assigned to You
+                            </span>
+                            <button class="btn btn-outline-danger btn-sm w-100" onclick="deleteVenue('${v._id}')">Remove Venue</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function saveVenue() {
+            // Notice: NO ownerId here! The backend will handle it securely.
+            const venueData = {
+                name: document.getElementById('vName').value,
+                img: document.getElementById('vImg').value,
+                price: document.getElementById('vPrice').value,
+                capacity: document.getElementById('vCap').value
+            };
+
+            try {
+                const response = await fetch('http://localhost:3000/api/owner/venues', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(venueData)
+                });
+
+                if (response.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('venueModal')).hide();
+                    Swal.fire({ icon: 'success', title: 'Venue Published!', showConfirmButton: false, timer: 1000 });
+                    
+                    loadMyVenues(); // Refresh the owner's grid
+                    document.getElementById('venueForm').reset();
+                } else {
+                    Swal.fire('Error', 'Failed to add venue.', 'error');
+                }
+            } catch (error) {
+                console.error("Save Venue Error:", error);
+                Swal.fire('Error', 'Network error. Check console for details.', 'error');
+            }
+        }
+
+        function deleteVenue(id) {
+            Swal.fire({
+                title: 'Delete Venue?', 
+                text: "This will permanently remove the venue!", 
+                icon: 'warning', 
+                showCancelButton: true, 
+                confirmButtonColor: '#d33'
+            }).then(async (res) => {
+                if(res.isConfirmed) {
+                    try {
+                        // Call the specific owner route
+                        const response = await fetch(`http://localhost:3000/api/owner/venues/${id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+
+                        if (response.ok) {
+                            Swal.fire({ icon: 'success', title: 'Deleted!', showConfirmButton: false, timer: 1000 });
+                            loadMyVenues(); // Refresh their grid from MongoDB
+                        } else {
+                            // Extract the specific error message from the backend
+                            const data = await response.json();
+                            Swal.fire('Error', data.message || 'Failed to delete venue.', 'error');
+                        }
+                    } catch (error) {
+                        console.error("Delete Venue Error:", error);
+                        Swal.fire('Error', 'Network error. Is server running?', 'error');
+                    }
+                }
+            });
+        }
+
+        // --- 6. Interactions & Exports ---
+        function viewDetails(id) {
+            const b = myBookings.find(x => x.id === id);
+            if(!b) return;
+
+            Swal.fire({
+                title: `Booking #${b.id.toString().substring(0,6)}`,
+                html: `
+                    <div class="text-start p-3 bg-light rounded border">
+                        <p><strong>Customer:</strong> ${b.customer}</p>
+                        <p><strong>Phone:</strong> ${b.phone || 'N/A'}</p>
+                        <p><strong>Venue:</strong> ${b.hall || b.venue}</p>
+                        <p><strong>Date:</strong> ${b.date}</p>
+                        <p><strong>Amount:</strong> ₹${parseInt(b.amount || 0).toLocaleString()}</p>
+                        <p><strong>Status:</strong> <span class="badge bg-secondary">${b.status}</span></p>
+                    </div>
+                `,
+                confirmButtonText: 'Close',
+                confirmButtonColor: '#4f46e5'
+            });
+        }
+
+        function downloadReport() {
+            if(myBookings.length === 0) {
+                return Swal.fire('No Data', 'There are no bookings to export.', 'info');
+            }
+
+            let csv = "ID,Customer,Phone,Venue,Date,Amount,Status\n";
+            myBookings.forEach(b => {
+                csv += `${b.id},${b.customer},${b.phone || ''},${b.hall || b.venue},${b.date},${b.amount || 0},${b.status}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); 
+            a.href = url; 
+            a.download = `Report_My_Venues_${Date.now()}.csv`; 
+            a.click();
+        }
+        
+        function requestPayout() {
+            Swal.fire({
+                title: 'Payout Requested!',
+                text: 'Your payout request has been sent to the Super Admin.',
+                icon: 'success',
+                confirmButtonColor: '#4f46e5'
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userData');
+            window.location.href = 'login.html';
+        }
+        
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            const val = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#bookingsTableBody tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(val) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

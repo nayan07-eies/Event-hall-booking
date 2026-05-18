@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventHallBook | Luxury Venue Reservations</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #818cf8;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.90);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #f1f5f9;
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, .serif-font { font-family: 'Playfair Display', serif; }
+
+        /* Navbar Transition */
+        .navbar {
+            transition: 0.4s ease;
+            padding: 1rem 0;
+            background: transparent;
+        }
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+            padding: 0.7rem 0;
+        }
+        .navbar.scrolled .nav-link, .navbar.scrolled .navbar-brand { color: var(--dark) !important; }
+
+        /* Hero Section */
+        .hero-section {
+            position: relative;
+            background: url('https://images.unsplash.com/photo-1519225468359-69632974a1d2?q=80&w=2070&auto=format&fit=crop') no-repeat center center/cover;
+            background-attachment: fixed;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-top: -80px;
+        }
+
+        .hero-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.9));
+        }
+
+        .hero-content { position: relative; z-index: 2; }
+
+        /* Floating Search Glass Card */
+        .search-container {
+            position: relative;
+            z-index: 3;
+            margin-top: -100px;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+        }
+
+        /* Form Inputs */
+        .form-control, .form-select {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0.8rem 1rem;
+            transition: 0.3s;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        /* Venue Cards */
+        .venue-card {
+            border: none;
+            border-radius: 16px;
+            overflow: hidden;
+            background: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .venue-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .venue-img-wrapper {
+            height: 250px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .venue-card img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .venue-card:hover img { transform: scale(1.1); }
+
+        .price-tag {
+            position: absolute; top: 15px; right: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 6px 14px; border-radius: 30px;
+            font-weight: bold; color: var(--primary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 2;
+        }
+
+        /* Process Steps */
+        .step-card {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 16px;
+            background: white;
+            height: 100%;
+            transition: 0.3s;
+            border: 1px solid #f1f5f9;
+        }
+        .step-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.05); border-color: var(--primary); }
+        
+        .step-icon {
+            width: 70px; height: 70px;
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            color: white;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            background: var(--dark);
+            color: white;
+            padding: 5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .stats-section::before {
+            content: ''; position: absolute; top:0; left:0; width:100%; height:100%;
+            background: radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.2) 0%, transparent 20%);
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-4 text-white" id="navLogo" href="#">
+                <i class="bi bi-gem text-info"></i> EventHall<span class="text-primary">Book</span>
+            </a>
+            <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link text-white active" href="#">Home</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="halls.html">Venues</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="contact.html">Contact</a></li>
+                    
+                    <li id="navAuth" class="nav-item ms-lg-4">
+                        <a class="btn btn-light rounded-pill px-4 fw-bold text-primary" href="login.html">Login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="container hero-content text-center" data-aos="fade-up">
+            <span class="badge bg-white bg-opacity-25 border border-white border-opacity-50 px-3 py-2 rounded-pill mb-4 text-white ls-1">
+                ✨ India's #1 Premium Venue Platform
+            </span>
+            <h1 class="display-1 fw-bold mb-4 serif-font">Host Unforgettable Events</h1>
+            <p class="lead fs-4 opacity-75 mb-5" style="max-width: 700px; margin: 0 auto;">
+                From grand weddings to corporate galas, discover and book prestigious venues instantly.
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="#venuesSection" class="btn btn-primary rounded-pill px-5 py-3 fw-bold shadow-lg">Explore Venues</a>
+                <a href="#process" class="btn btn-outline-light rounded-pill px-5 py-3 fw-bold">How it Works</a>
+            </div>
+        </div>
+    </section>
+
+    <div class="container search-container" data-aos="fade-up" data-aos-delay="100">
+        <div class="glass-card">
+            <form action="halls.html" class="row g-3 align-items-end">
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label fw-bold text-muted small text-uppercase">Event Date</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-calendar-event text-primary"></i></span>
+                        <input type="date" class="form-control border-start-0 ps-0" required>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label fw-bold text-muted small text-uppercase">Event Type</label>
+                    <select class="form-select text-dark">
+                        <option value="">Select Type</option>
+                        <option value="Wedding">Wedding & Reception</option>
+                        <option value="Conference">Corporate Conference</option>
+                        <option value="Party">Social Gathering</option>
+                    </select>
+                </div>
+                <div class="col-lg-4">
+                    <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-bold shadow-lg" style="height: 45px;">
+                        <i class="bi bi-search me-2"></i> Find Availability
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <section class="py-5 mt-5" id="venuesSection">
+        <div class="container">
+            <div class="row align-items-end mb-5" data-aos="fade-right">
+                <div class="col-lg-8">
+                    <h6 class="text-primary fw-bold text-uppercase ls-2">Curated Collection</h6>
+                    <h2 class="display-5 fw-bold serif-font">Handpicked for Excellence</h2>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                    <button onclick="fetchVenues()" class="btn btn-outline-dark rounded-pill px-4"><i class="bi bi-arrow-clockwise me-2"></i>Refresh List</button>
+                </div>
+            </div>
+
+            <div class="row g-4" id="featuredVenuesGrid">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted fw-bold">Loading live venues...</p>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <section class="stats-section mt-5">
+        <div class="container">
+            <div class="row text-center g-4">
+                <div class="col-md-3" data-aos="zoom-in">
+                    <h2 class="display-4 fw-bold">50+</h2>
+                    <p class="text-white-50 small text-uppercase ls-1">Premium Venues</p>
+                </div>
+                <div class="col-md-3" data-aos="zoom-in" data-aos-delay="100">
+                    <h2 class="display-4 fw-bold">1.2k</h2>
+                    <p class="text-white-50 small text-uppercase ls-1">Events Hosted</p>
+                </div>
+                <div class="col-md-3" data-aos="zoom-in" data-aos-delay="200">
+                    <h2 class="display-4 fw-bold">5k+</h2>
+                    <p class="text-white-50 small text-uppercase ls-1">Happy Guests</p>
+                </div>
+                <div class="col-md-3" data-aos="zoom-in" data-aos-delay="300">
+                    <h2 class="display-4 fw-bold">12</h2>
+                    <p class="text-white-50 small text-uppercase ls-1">Cities Covered</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-light py-5" id="process">
+        <div class="container py-5">
+            <div class="text-center mb-5">
+                <h6 class="text-primary fw-bold text-uppercase ls-2">Process</h6>
+                <h2 class="display-6 fw-bold serif-font">Booking Made Simple</h2>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="0">
+                    <div class="step-card">
+                        <div class="step-icon"><i class="bi bi-search"></i></div>
+                        <h4>1. Discover</h4>
+                        <p class="text-muted">Browse verified listings with high-resolution photos, real reviews, and 360° views.</p>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="step-card">
+                        <div class="step-icon"><i class="bi bi-calendar-check"></i></div>
+                        <h4>2. Select Date</h4>
+                        <p class="text-muted">Check real-time availability and customize your package with catering & decor addons.</p>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="step-card">
+                        <div class="step-icon"><i class="bi bi-credit-card"></i></div>
+                        <h4>3. Secure</h4>
+                        <p class="text-muted">Pay a small deposit securely to block the date and receive an instant digital receipt.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white pt-5 pb-3">
+        <div class="container">
+            <div class="row g-5">
+                <div class="col-lg-4">
+                    <h4 class="fw-bold mb-3 serif-font">EventHall<span class="text-primary">Book</span></h4>
+                    <p class="text-secondary">Transforming the way you celebrate. We connect you with the most elegant spaces in the city.</p>
+                    <div class="d-flex gap-3 mt-3">
+                        <a href="#" class="fs-5 text-white-50"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="fs-5 text-white-50"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="fs-5 text-white-50"><i class="bi bi-twitter-x"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <h6 class="fw-bold mb-3">Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#venuesSection" class="text-secondary text-decoration-none">Venues</a></li>
+                        <li class="mb-2"><a href="login.html" class="text-secondary text-decoration-none">Login</a></li>
+                        <li class="mb-2"><a href="contact.html" class="text-secondary text-decoration-none">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-6">
+                    <h6 class="fw-bold mb-3">Subscribe</h6>
+                    <form class="input-group">
+                        <input type="email" class="form-control bg-secondary bg-opacity-10 border-0 text-white" placeholder="Email address">
+                        <button class="btn btn-primary px-4">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+            <hr class="border-secondary mt-5">
+            <div class="text-center text-secondary small">
+                &copy; 2026 EventHallBook. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        // --- 1. Init Animations ---
+        AOS.init({ duration: 800, once: true });
+
+        // --- 2. Navbar Scroll Effect ---
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('mainNav');
+            const logo = document.getElementById('navLogo');
+            const links = document.querySelectorAll('.nav-link');
+            
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+                logo.classList.remove('text-white');
+                logo.classList.add('text-dark');
+                links.forEach(l => { l.classList.remove('text-white'); l.classList.add('text-dark'); });
+            } else {
+                nav.classList.remove('scrolled');
+                logo.classList.add('text-white');
+                logo.classList.remove('text-dark');
+                links.forEach(l => { l.classList.add('text-white'); l.classList.remove('text-dark'); });
+            }
+        });
+
+        // --- 3. Run on Page Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuthStatus();
+            fetchVenues(); // Load venues securely from Node.js
+        });
+
+        // --- 4. Auth State Logic ---
+        function checkAuthStatus() {
+            const userData = JSON.parse(localStorage.getItem('userData'));
+            const token = localStorage.getItem('authToken');
+            const navAuth = document.getElementById('navAuth');
+            
+            if (userData && token) {
+                // By default, regular users go to their profile page
+                let dashboardLink = 'profile.html'; 
+                let dashboardText = 'My Profile';
+                let dashboardIcon = 'bi-person';
+
+                // If they are an admin, redirect them to the admin dashboard instead
+                if(userData.role === 'admin') {
+                    dashboardLink = 'admin.html';
+                    dashboardText = 'Admin Dashboard';
+                    dashboardIcon = 'bi-speedometer2';
+                }
+
+                navAuth.innerHTML = `
+                    <div class="dropdown">
+                        <button class="btn btn-light dropdown-toggle rounded-pill px-4 fw-bold text-primary shadow-sm" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i> ${userData.name.split(' ')[0]}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 p-2 rounded-3">
+                            <li><a class="dropdown-item rounded-2" href="${dashboardLink}"><i class="bi ${dashboardIcon} me-2"></i>${dashboardText}</a></li>
+                            <li><a class="dropdown-item rounded-2" href="my-bookings.html"><i class="bi bi-calendar-event me-2"></i>My Bookings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger rounded-2" href="#" onclick="logout()"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('userData');
+            localStorage.removeItem('authToken'); 
+            window.location.reload();
+        }
+
+        // --- 5. Fetch Venues from MongoDB ---
+        async function fetchVenues() {
+            const grid = document.getElementById('featuredVenuesGrid');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/venues');
+                
+                if (response.ok) {
+                    const venues = await response.json();
+                    
+                    if (venues.length === 0) {
+                        grid.innerHTML = `
+                            <div class="col-12 text-center py-5">
+                                <div class="p-5 bg-white rounded-4 shadow-sm">
+                                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                                    <h4 class="mt-3 text-muted">No venues available yet.</h4>
+                                </div>
+                            </div>`;
+                        return;
+                    }
+
+                    grid.innerHTML = venues.map((v, index) => `
+                        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="${(index % 3) * 100}">
+                            <div class="venue-card">
+                                <div class="venue-img-wrapper">
+                                    <span class="price-tag">₹${v.price.toLocaleString()}/hr</span>
+                                    <img src="${v.img}" alt="${v.name}">
+                                </div>
+                                <div class="p-4 flex-grow-1 d-flex flex-column">
+                                    <div class="mb-2">
+                                        <span class="badge bg-light text-secondary">Premium</span>
+                                        <span class="badge bg-light text-secondary">Verified</span>
+                                    </div>
+                                    <h5 class="fw-bold mb-1">${v.name}</h5>
+                                    <p class="text-muted small"><i class="bi bi-geo-alt-fill text-danger"></i> Prime Location</p>
+                                    <div class="d-flex justify-content-between align-items-center mt-auto border-top pt-3">
+                                        <span class="small fw-bold"><i class="bi bi-people-fill text-primary"></i> ${v.capacity} Guests</span>
+                                        <button onclick="handleBooking('${v._id}')" class="btn btn-sm btn-primary rounded-pill px-4">Book Now</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                grid.innerHTML = '<div class="col-12 text-center text-danger fw-bold py-5">Failed to connect to server. Please ensure Node.js is running.</div>';
+            }
+        }
+
+        // --- 6. Booking Redirect Logic ---
+        function handleBooking(venueId) {
+            const token = localStorage.getItem('authToken');
+            
+            // Require login before they can go to the booking page
+            if (!token) {
+                Swal.fire({
+                    icon: 'info', title: 'Login Required', text: 'Please log in or create an account to book venues.',
+                    confirmButtonText: 'Go to Login', confirmButtonColor: '#4f46e5'
+                }).then(() => { window.location.href = 'login.html'; });
+                return;
+            }
+
+            // Redirect securely to your separate booking page with the venue ID
+            window.location.href = `booking.html?id=${venueId}`;
+        }
+    </script>
+</body>
+</html>

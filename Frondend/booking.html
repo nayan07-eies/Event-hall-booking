@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Booking | EventHallBook</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.95);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #f1f5f9;
+            color: var(--dark);
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4, .serif-font { font-family: 'Playfair Display', serif; }
+
+        /* Navbar */
+        .navbar { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+
+        /* Cards */
+        .glass-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            overflow: hidden;
+        }
+
+        /* Inputs */
+        .form-control, .form-select {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Steps */
+        .step-indicator {
+            width: 32px; height: 32px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center; justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Add-on Cards */
+        .addon-card {
+            border: 2px solid #f1f5f9;
+            border-radius: 16px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+            height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+        }
+
+        .addon-card:hover { transform: translateY(-5px); border-color: #cbd5e1; }
+        
+        .addon-card.selected {
+            border-color: var(--primary);
+            background-color: #eef2ff;
+            color: var(--primary);
+        }
+        
+        .addon-card i { font-size: 1.5rem; margin-bottom: 0.5rem; }
+
+        /* Summary Sticky Box */
+        .summary-box {
+            position: sticky;
+            top: 100px;
+        }
+
+        .venue-thumb {
+            width: 100%; height: 200px;
+            object-fit: cover;
+            border-radius: 16px;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--primary);
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: 0.3s;
+        }
+        .btn-primary:hover { background-color: #4338ca; transform: translateY(-2px); }
+
+        /* Receipt (Hidden) */
+        #receipt-container { display: none; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-4 text-dark" href="index.html">
+                <i class="bi bi-arrow-left-circle-fill text-primary me-2"></i> 
+                <span class="serif-font">Back to Home</span>
+            </a>
+            <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-bold border border-success-subtle">
+                <i class="bi bi-shield-lock-fill me-1"></i> Secure Checkout
+            </span>
+        </div>
+    </nav>
+
+    <div class="container" style="margin-top: 100px; margin-bottom: 80px;">
+        <div class="row g-4">
+            
+            <div class="col-lg-8">
+                <div class="glass-card p-4 p-md-5 mb-4">
+                    <div class="d-flex align-items-center mb-4 pb-4 border-bottom">
+                        <div>
+                            <h2 class="fw-bold serif-font mb-2">Finalize Your Event</h2>
+                            <p class="text-muted mb-0">Complete the details below to secure your reservation.</p>
+                        </div>
+                    </div>
+
+                    <form id="bookingForm">
+                        <div class="mb-5">
+                            <h5 class="fw-bold mb-4 d-flex align-items-center">
+                                <span class="step-indicator">1</span> Your Details
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Full Name</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text border-end-0 bg-light rounded-start-3"><i class="bi bi-person text-muted"></i></span>
+                                        <input type="text" id="custName" class="form-control border-start-0 ps-0" placeholder="e.g. John Doe" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Phone Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text border-end-0 bg-light rounded-start-3"><i class="bi bi-whatsapp text-muted"></i></span>
+                                        <input type="tel" id="custPhone" class="form-control border-start-0 ps-0" placeholder="e.g. 9876543210" pattern="[0-9]{10}" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-5">
+                            <h5 class="fw-bold mb-4 d-flex align-items-center">
+                                <span class="step-indicator">2</span> Event Configuration
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Date</label>
+                                    <input type="date" id="eventDate" class="form-control" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Time Slot</label>
+                                    <select id="timeSlot" class="form-select" required>
+                                        <option value="12" selected>Full Day (6 AM - 6 PM)</option>
+                                        <option value="12">Night (6 PM - 6 AM)</option>
+                                        <option value="6">Morning Half (6 AM - 12 PM)</option>
+                                        <option value="6">Evening Half (12 PM - 6 PM)</option>
+                                        <option value="24">24 Hours (6 AM - 6 AM)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Guests</label>
+                                    <div class="input-group">
+                                        <input type="number" id="guests" class="form-control" value="50" min="10" required>
+                                        <span class="input-group-text bg-light text-muted small"><i class="bi bi-people"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-5">
+                            <h5 class="fw-bold mb-4 d-flex align-items-center">
+                                <span class="step-indicator">3</span> Event Customization
+                            </h5>
+                            
+                            <h6 class="fw-bold mb-3 text-muted small text-uppercase mt-2">Cuisine Package (Choose One)</h6>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-3 col-6">
+                                    <div class="addon-card cuisine-card selected" onclick="selectCuisine(0, 'No Catering', this)">
+                                        <i class="bi bi-x-circle text-secondary"></i>
+                                        <div class="fw-bold small">No Catering</div>
+                                        <div class="text-muted smaller">₹0</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="addon-card cuisine-card" onclick="selectCuisine(10000, 'Authentic Gujarati', this)">
+                                        <i class="bi bi-cup-hot-fill text-warning"></i>
+                                        <div class="fw-bold small">Authentic Gujarati</div>
+                                        <div class="text-muted smaller">₹10,000</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="addon-card cuisine-card" onclick="selectCuisine(12000, 'Punjabi Feast', this)">
+                                        <i class="bi bi-fire text-danger"></i>
+                                        <div class="fw-bold small">Punjabi Feast</div>
+                                        <div class="text-muted smaller">₹12,000</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="addon-card cuisine-card" onclick="selectCuisine(15000, 'Grand Indian Mix', this)">
+                                        <i class="bi bi-stars text-primary"></i>
+                                        <div class="fw-bold small">Grand Indian Mix</div>
+                                        <div class="text-muted smaller">₹15,000</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6 class="fw-bold mb-3 text-muted small text-uppercase">Starters & Drinks (Select Multiple)</h6>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-3 col-6">
+                                    <div class="addon-card" onclick="toggleAddon('starters', 4000, this)">
+                                        <i class="bi bi-pie-chart-fill text-success"></i>
+                                        <div class="fw-bold small">Assorted Starters</div>
+                                        <div class="text-muted smaller">₹4,000</div>
+                                        <input type="checkbox" id="starters" class="d-none">
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="addon-card" onclick="toggleAddon('chaat', 3500, this)">
+                                        <i class="bi bi-basket2-fill text-warning"></i>
+                                        <div class="fw-bold small">Live Chaat Counter</div>
+                                        <div class="text-muted smaller">₹3,500</div>
+                                        <input type="checkbox" id="chaat" class="d-none">
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="addon-card" onclick="toggleAddon('drinks', 3000, this)">
+                                        <i class="bi bi-cup-straw text-info"></i>
+                                        <div class="fw-bold small">Premium Mocktails</div>
+                                        <div class="text-muted smaller">₹3,000</div>
+                                        <input type="checkbox" id="drinks" class="d-none">
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="addon-card" onclick="toggleAddon('coffee', 2000, this)">
+                                        <i class="bi bi-cup-hot text-secondary"></i>
+                                        <div class="fw-bold small">Live Tea/Coffee</div>
+                                        <div class="text-muted smaller">₹2,000</div>
+                                        <input type="checkbox" id="coffee" class="d-none">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6 class="fw-bold mb-3 text-muted small text-uppercase">Decor Theme (Choose One)</h6>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-3 col-6">
+                                    <div class="addon-card decor-card selected" onclick="selectDecor(0, 'No Decor', this)">
+                                        <i class="bi bi-x-circle text-secondary"></i>
+                                        <div class="fw-bold small">No Decor</div>
+                                        <div class="text-muted smaller">₹0</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="addon-card decor-card" onclick="selectDecor(8000, 'Classic Floral', this)">
+                                        <i class="bi bi-flower1 text-danger"></i>
+                                        <div class="fw-bold small">Classic Floral</div>
+                                        <div class="text-muted smaller">₹8,000</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="addon-card decor-card" onclick="selectDecor(15000, 'Royal Heritage', this)">
+                                        <i class="bi bi-brightness-high-fill text-warning"></i>
+                                        <div class="fw-bold small">Royal Heritage</div>
+                                        <div class="text-muted smaller">₹15,000</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="addon-card decor-card" onclick="selectDecor(12000, 'Modern Glamour', this)">
+                                        <i class="bi bi-gem text-primary"></i>
+                                        <div class="fw-bold small">Modern Glamour</div>
+                                        <div class="text-muted smaller">₹12,000</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6 class="fw-bold mb-3 text-muted small text-uppercase">Entertainment</h6>
+                            <div class="row g-3">
+                                <div class="col-md-4 col-12">
+                                    <div class="addon-card" onclick="toggleAddon('dj', 3000, this)">
+                                        <i class="bi bi-music-note-beamed text-dark"></i>
+                                        <div class="fw-bold small">DJ & Sound System</div>
+                                        <div class="text-muted smaller">₹3,000</div>
+                                        <input type="checkbox" id="dj" class="d-none">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5 class="fw-bold mb-4 d-flex align-items-center">
+                                <span class="step-indicator">4</span> Payment Method
+                            </h5>
+                            <div class="d-flex flex-column gap-3">
+                                <label class="glass-card p-3 d-flex align-items-center cursor-pointer border border-primary bg-primary-subtle" style="cursor:pointer">
+                                    <input type="radio" name="payment" value="Paid" checked class="form-check-input mt-0 me-3 p-2">
+                                    <div>
+                                        <div class="fw-bold text-dark">Pay Now (Card/UPI)</div>
+                                        <div class="small text-muted">Secure instant booking confirmation.</div>
+                                    </div>
+                                    <i class="bi bi-credit-card-2-front ms-auto fs-4 text-primary"></i>
+                                </label>
+                                
+                                <label class="glass-card p-3 d-flex align-items-center cursor-pointer" style="cursor:pointer">
+                                    <input type="radio" name="payment" value="Unpaid" class="form-check-input mt-0 me-3 p-2">
+                                    <div>
+                                        <div class="fw-bold text-dark">Pay at Venue</div>
+                                        <div class="small text-muted">Block date now, pay 24hrs before event.</div>
+                                    </div>
+                                    <i class="bi bi-shop ms-auto fs-4 text-muted"></i>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="submitBtn" class="btn btn-primary w-100 shadow-lg">
+                            Confirm Booking & Download Receipt
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="glass-card p-4 summary-box">
+                    <h5 class="fw-bold serif-font mb-3">Booking Summary</h5>
+                    
+                    <div id="venuePreview" class="mb-3">
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2 small text-muted">
+                        <span>Venue Rate</span>
+                        <span id="baseRate">₹0 / hr</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mb-2 small text-muted">
+                        <span>Time Slot</span>
+                        <span id="hoursDisplay">Full Day (6 AM - 6 PM)</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-1 small text-success">
+                        <span>Customizations</span>
+                        <span id="addonTotal">+ ₹0</span>
+                    </div>
+                    <div id="addonList" class="text-muted smaller mb-3" style="padding-left: 10px; font-style: italic;">
+                    </div>
+
+                    <div class="border-top border-bottom py-3 mb-3">
+                        <div class="input-group">
+                            <input type="text" id="couponCode" class="form-control form-control-sm" placeholder="Promo Code">
+                            <button class="btn btn-dark btn-sm" onclick="applyCoupon()">Apply</button>
+                        </div>
+                        <div id="discountRow" class="d-flex justify-content-between text-danger fw-bold small mt-2" style="display:none !important;">
+                            <span>Discount (10%)</span>
+                            <span id="discountVal">- ₹0</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-bold">Total Payable</span>
+                        <span class="fs-3 fw-bold text-primary serif-font" id="totalPrice">₹0</span>
+                    </div>
+                    <div class="text-end text-muted smaller mb-0">Inc. of all taxes</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="receipt-container" style="position: absolute; left: -9999px;">
+        <div id="receiptTemplate" style="width: 700px; padding: 40px; background: white; font-family: 'Helvetica', sans-serif; color: #333;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 30px;">
+                <div>
+                    <h2 style="color: #4f46e5; margin: 0; font-family: serif;">EventHallBook</h2>
+                    <p style="margin: 5px 0 0; color: #666; font-size: 14px;">Premium Venue Reservations</p>
+                </div>
+                <div style="text-align: right;">
+                    <h3 style="margin: 0; color: #333;">INVOICE</h3>
+                    <p style="margin: 5px 0 0; color: #666; font-size: 14px;">#<span id="r-id"></span></p>
+                    <p style="margin: 2px 0 0; color: #666; font-size: 14px;">Issued: <span id="r-date-now"></span></p>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px; display: flex; justify-content: space-between;">
+                <div>
+                    <strong style="color: #4f46e5; display: block; margin-bottom: 5px;">Billed To:</strong>
+                    <span id="r-name" style="font-size: 16px;"></span><br>
+                    <span id="r-phone" style="color: #666; font-size: 14px;"></span>
+                </div>
+                <div style="text-align: right;">
+                    <strong style="color: #4f46e5; display: block; margin-bottom: 5px;">Event Details:</strong>
+                    <span id="r-venue" style="font-weight: bold;"></span><br>
+                    <span style="color: #666; font-size: 14px;">Date: <span id="r-date"></span></span><br>
+                    <span style="color: #666; font-size: 14px;">Slot: <span id="r-time"></span></span>
+                </div>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                <thead>
+                    <tr style="background-color: #f8fafc; color: #475569;">
+                        <th style="text-align: left; padding: 12px; border-bottom: 1px solid #e2e8f0;">Description</th>
+                        <th style="text-align: right; padding: 12px; border-bottom: 1px solid #e2e8f0;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                            <strong>Venue Rental & Packages</strong><br>
+                            <div id="r-addon-list" style="font-size: 12px; color: #64748b; margin-top: 5px; padding-left: 8px; line-height: 1.4;"></div>
+                        </td>
+                        <td style="text-align: right; padding: 12px; border-bottom: 1px solid #eee; vertical-align: top;" id="r-amount"></td>
+                    </tr>
+                    <tr id="r-discount-row" style="display:none; color: #dc2626;">
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">Discount Applied</td>
+                        <td style="text-align: right; padding: 12px; border-bottom: 1px solid #eee;" id="r-discount"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="text-align: right;">
+                <h2 style="color: #4f46e5; margin: 0;">Total: <span id="r-total"></span></h2>
+                <p style="margin: 5px 0 0; font-size: 14px; color: #666;">Payment Status: <strong id="r-status" style="text-transform: uppercase;"></strong></p>
+            </div>
+            
+            <div style="margin-top: 50px; text-align: center; font-size: 12px; color: #94a3b8;">
+                Thank you for choosing EventHallBook. This is a computer-generated invoice.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Global State ---
+        let currentHall = { price: 0, name: "Loading...", img: "" };
+        let addonsCost = 0;
+        let discount = 0;
+        
+        let decorCost = 0;
+        let selectedDecorName = "";
+        
+        let cuisineCost = 0;
+        let selectedCuisineName = "";
+        
+        let selectedAddons = new Set();
+
+        // --- 2. Initialization & Data Fetching ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('authToken');
+            const userDataStr = localStorage.getItem('userData');
+            
+            if (!token || !userDataStr) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const user = JSON.parse(userDataStr);
+            document.getElementById('custName').value = user.name;
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const hallId = urlParams.get('id');
+
+            if (!hallId) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/venues/${hallId}`);
+                if (!response.ok) throw new Error('Venue not found');
+                
+                const venue = await response.json();
+                
+                currentHall = {
+                    name: venue.name,
+                    price: venue.price,
+                    img: venue.img || venue.image
+                };
+
+                document.getElementById('venuePreview').innerHTML = `
+                    <div class="position-relative">
+                        <img src="${currentHall.img}" class="venue-thumb mb-2 shadow-sm">
+                        <div class="badge bg-white text-dark shadow-sm position-absolute top-0 start-0 m-3">
+                            <i class="bi bi-geo-alt-fill text-danger"></i> ${currentHall.name}
+                        </div>
+                    </div>
+                `;
+                document.getElementById('baseRate').innerText = `₹${currentHall.price.toLocaleString()}`;
+                
+                updateCalculations();
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire('Error', 'Could not load details.', 'error').then(() => window.location.href = 'index.html');
+            }
+
+            document.getElementById('eventDate').min = new Date().toISOString().split("T")[0];
+        });
+
+        // --- 3. Interactive Logic ---
+        function toggleAddon(id, price, card) {
+            const checkbox = document.getElementById(id);
+            if(event && event.target !== checkbox) checkbox.checked = !checkbox.checked;
+            
+            const itemName = card.querySelector('.fw-bold').innerText;
+            
+            if(checkbox.checked) {
+                card.classList.add('selected');
+                addonsCost += price;
+                selectedAddons.add(itemName);
+            } else {
+                card.classList.remove('selected');
+                addonsCost -= price;
+                selectedAddons.delete(itemName);
+            }
+            updateCalculations();
+        }
+
+        function selectCuisine(price, name, card) {
+            document.querySelectorAll('.cuisine-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            
+            addonsCost = addonsCost - cuisineCost + price;
+            cuisineCost = price; 
+            
+            if (price > 0) {
+                selectedCuisineName = name;
+            } else {
+                selectedCuisineName = "";
+            }
+            updateCalculations();
+        }
+
+        function selectDecor(price, name, card) {
+            document.querySelectorAll('.decor-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            
+            addonsCost = addonsCost - decorCost + price;
+            decorCost = price; 
+            
+            if (price > 0) {
+                selectedDecorName = name;
+            } else {
+                selectedDecorName = "";
+            }
+            updateCalculations();
+        }
+
+        function applyCoupon() {
+            const code = document.getElementById('couponCode').value.toUpperCase();
+            if(code === "WELCOME10") {
+                discount = 0.10;
+                document.getElementById('discountRow').style.setProperty('display', 'flex', 'important');
+                Swal.fire({ icon: 'success', title: 'Applied!', text: '10% discount added.', timer: 1500, showConfirmButton: false });
+            } else {
+                discount = 0;
+                document.getElementById('discountRow').style.setProperty('display', 'none', 'important');
+                Swal.fire({ icon: 'error', title: 'Invalid Code', text: 'Try WELCOME10' });
+            }
+            updateCalculations();
+        }
+
+        function updateCalculations() {
+            const timeSlotSelect = document.getElementById('timeSlot');
+            const duration = parseInt(timeSlotSelect.value) || 0;
+            const slotText = timeSlotSelect.options[timeSlotSelect.selectedIndex].text;
+            
+            const baseTotal = currentHall.price * duration;
+            
+            let finalTotal = baseTotal + addonsCost;
+            let discountAmount = 0;
+
+            if(discount > 0) {
+                discountAmount = finalTotal * discount;
+                finalTotal -= discountAmount;
+            }
+
+            document.getElementById('hoursDisplay').innerText = slotText;
+            document.getElementById('addonTotal').innerText = `+ ₹${addonsCost.toLocaleString()}`;
+            document.getElementById('discountVal').innerText = `- ₹${Math.floor(discountAmount).toLocaleString()}`;
+            document.getElementById('totalPrice').innerText = `₹${Math.floor(finalTotal).toLocaleString()}`;
+
+            const addonListDiv = document.getElementById('addonList');
+            if (addonListDiv) {
+                let allSelected = Array.from(selectedAddons);
+                if (selectedCuisineName) allSelected.push(selectedCuisineName);
+                if (selectedDecorName) allSelected.push(selectedDecorName);
+                
+                if (allSelected.length > 0) {
+                    addonListDiv.innerHTML = '• ' + allSelected.join('<br>• ');
+                } else {
+                    addonListDiv.innerHTML = '';
+                }
+            }
+
+            return { baseTotal, discountAmount, finalTotal };
+        }
+
+        document.getElementById('timeSlot').addEventListener('change', updateCalculations);
+
+        // --- 4. Submit to MongoDB & Generate PDF ---
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const date = document.getElementById('eventDate').value;
+            if(!date) { Swal.fire('Date Required', 'Please select a date.', 'warning'); return; }
+
+            const btn = document.getElementById('submitBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processing...';
+            btn.disabled = true;
+
+            const timeSlotSelect = document.getElementById('timeSlot');
+            const slotText = timeSlotSelect.options[timeSlotSelect.selectedIndex].text;
+            let allSelected = Array.from(selectedAddons);
+            if (selectedCuisineName) allSelected.push(selectedCuisineName);
+            if (selectedDecorName) allSelected.push(selectedDecorName);
+
+            const { baseTotal, discountAmount, finalTotal } = updateCalculations();
+            const bookingId = "BK-" + Math.floor(100000 + Math.random() * 900000); 
+            const customerName = document.getElementById('custName').value;
+            const customerPhone = document.getElementById('custPhone').value;
+            const paymentType = document.querySelector('input[name="payment"]:checked').value;
+            const finalStatus = paymentType === 'Paid' ? 'Paid' : 'Pending Payment';
+
+            const bookingData = {
+                id: bookingId,
+                customer: customerName,
+                phone: customerPhone,
+                date: date,
+                timeSlot: slotText,
+                venue: currentHall.name,
+                amount: Math.floor(finalTotal),
+                status: finalStatus,
+                addons: allSelected
+            };
+
+            try {
+                const token = localStorage.getItem('authToken');
+
+                if (paymentType === 'Paid') {
+                    const orderRes = await fetch('http://localhost:3000/api/create-payment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ amount: finalTotal }) 
+                    });
+                    const orderData = await orderRes.json();
+
+                    const options = {
+                        "key": "rzp_test_SPlMZp6VAN2mtt", // Keep your real test key here
+                        "amount": orderData.amount, 
+                        "currency": "INR",
+                        "name": "EventHallBook",
+                        "description": `Booking for ${currentHall.name}`,
+                        "order_id": orderData.id,
+                        "handler": async function (response) {
+                            try {
+                                bookingData.paymentId = response.razorpay_payment_id;
+                                await saveBookingAndGeneratePDF(bookingData, baseTotal, addonsCost, finalTotal, discountAmount, bookingId, customerName, customerPhone, finalStatus, token, slotText);
+                                resetButton(btn, originalText);
+                            } catch (err) {
+                                console.error("Post-payment error:", err);
+                                Swal.fire('Database Error', 'Payment succeeded, but failed to save booking. Please check console.', 'error');
+                                resetButton(btn, originalText);
+                            }
+                        },
+                        "prefill": {
+                            "name": customerName,
+                            "contact": customerPhone
+                        },
+                        "theme": { "color": "#4f46e5" },
+                        "modal": {
+                            "ondismiss": function() {
+                                resetButton(btn, originalText);
+                            }
+                        }
+                    };
+                    const rzp = new Razorpay(options);
+                    rzp.on('payment.failed', function (response){
+                        Swal.fire('Payment Failed', response.error.description, 'error');
+                        resetButton(btn, originalText);
+                    });
+                    rzp.open();
+                    
+                } else {
+                    await saveBookingAndGeneratePDF(bookingData, baseTotal, addonsCost, finalTotal, discountAmount, bookingId, customerName, customerPhone, finalStatus, token, slotText);
+                    resetButton(btn, originalText);
+                }
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire('Error', 'Server connection failed. Could not secure booking.', 'error');
+                resetButton(btn, originalText);
+            }
+        });
+
+        function resetButton(btn, originalText) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+
+        async function saveBookingAndGeneratePDF(bookingData, baseTotal, addonsCost, finalTotal, discountAmount, bookingId, customerName, customerPhone, finalStatus, token, slotText) {
+            
+            // 1. Save to Database
+            const response = await fetch('http://localhost:3000/api/bookings', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bookingData)
+            });
+
+            if (!response.ok) throw new Error('Failed to save to database');
+
+            // 2. Populate PDF Template (FIXED ID HERE)
+            document.getElementById('r-id').innerText = bookingId;
+            document.getElementById('r-date-now').innerText = new Date().toLocaleDateString();
+            document.getElementById('r-name').innerText = customerName;
+            document.getElementById('r-phone').innerText = customerPhone;
+            document.getElementById('r-venue').innerText = currentHall.name;
+            document.getElementById('r-date').innerText = bookingData.date;
+            document.getElementById('r-time').innerText = slotText;
+            document.getElementById('r-amount').innerText = `₹${Math.floor(finalTotal).toLocaleString()}`; // Fixed from r-base
+            document.getElementById('r-total').innerText = `₹${Math.floor(finalTotal).toLocaleString()}`;
+            document.getElementById('r-status').innerText = finalStatus;
+
+            let allSelectedPdf = Array.from(selectedAddons);
+            if (selectedCuisineName) allSelectedPdf.push(selectedCuisineName);
+            if (selectedDecorName) allSelectedPdf.push(selectedDecorName);
+            
+            const pdfAddonList = document.getElementById('r-addon-list');
+            if (allSelectedPdf.length > 0) {
+                pdfAddonList.innerHTML = '• ' + allSelectedPdf.join('<br>• ');
+                pdfAddonList.style.display = 'block';
+            } else {
+                pdfAddonList.innerHTML = 'Base Venue Rental Only';
+                pdfAddonList.style.display = 'block';
+            }
+
+            if(discountAmount > 0) {
+                document.getElementById('r-discount-row').style.display = 'table-row';
+                document.getElementById('r-discount').innerText = `- ₹${Math.floor(discountAmount).toLocaleString()}`;
+            }
+
+            // 3. Trigger Success Confetti & SweetAlert
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+
+            Swal.fire({
+                title: '🎉 Confirmed, ' + customerName.split(' ')[0] + '!',
+                html: `
+                    <div style="font-size: 1.1rem; margin-bottom: 15px;">
+                        Your event at <strong class="text-primary">${currentHall.name}</strong> on <strong>${bookingData.date}</strong> for the <strong>${slotText}</strong> slot is locked in.
+                    </div>
+                    <div class="text-muted small">
+                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                        Please wait while we generate your official receipt...
+                    </div>
+                `,
+                icon: 'success',
+                allowOutsideClick: false,
+                showConfirmButton: false
+            });
+
+            // 4. Generate PDF and redirect
+            const element = document.getElementById('receiptTemplate');
+            const container = document.getElementById('receipt-container');
+            
+            container.style.display = 'block';
+            container.style.left = '0';
+            container.style.top = '0';
+            container.style.zIndex = '-9999';
+
+            const opt = { 
+                margin: 0.5, 
+                filename: `Invoice_${bookingId}.pdf`, 
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { scale: 2, scrollY: 0 }, 
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } 
+            };
+
+            try {
+                await html2pdf().set(opt).from(element).save();
+                container.style.left = '-9999px';
+                container.style.display = 'none';
+                window.location.href = 'mybookings.html'; 
+            } catch (err) {
+                console.error("PDF Generation Error:", err);
+                container.style.display = 'none';
+                Swal.fire('Warning', 'Booking saved, but PDF failed to generate.', 'warning')
+                .then(() => window.location.href = 'mybookings.html');
+            }
+        }
+    </script>
+</body>
+</html>
