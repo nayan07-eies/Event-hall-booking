@@ -16,7 +16,7 @@ const JWT_SECRET = 'super_secret_aitripplanner_key_123';
 const RAZORPAY_KEY_ID = 'rzp_test_Se3Ul1lOzDFRKX';       
 const RAZORPAY_KEY_SECRET = '27uEztCEXaFra6fq6W70t3ZV';  
 
-const MONGO_URI = 'mongodb+srv://Eventhall:event12345@cluster0.2hyvlxq.mongodb.net/eventhallDB?appName=Cluster0';
+const MONGO_URI = 'mongodb+srv://Eventhall:event12345@cluster0.2hyvlxq.mongodb.net/?appName=';
 
 mongoose.connect(MONGO_URI)
     .then(() => console.log('✅ Connected to MongoDB successfully!'))
